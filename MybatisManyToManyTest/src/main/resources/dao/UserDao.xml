@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.UserDao">
+
+    <resultMap id="UserAccountMap" type="User">
+        <id property="id" column="id"></id>
+        <result property="username" column="username"></result>
+        <result property="birthday" column="birthday"></result>
+        <result property="sex" column="sex"></result>
+        <result property="address" column="address"></result>
+        <collection property="roles" ofType="Role">
+            <id property="roleId" column="rid"></id>
+            <result property="roleName" column="role_name"></result>
+            <result property="roleDesc" column="role_desc"></result>
+        </collection>
+    </resultMap>
+
+<!--    &lt;!&ndash;查询所有&ndash;&gt;
+    <select id="findAll" resultMap="UserAccountMap">
+      select * from  user u left outer join account a on u.id = a.uid;
+    </select>-->
+    <!--查询所有-->
+    <select id="findAll" resultMap="UserAccountMap">
+      select u.* , r.id as rid, r.role_name,r.role_desc from user u
+        left outer join user_role ur on u.id = ur.uid
+        left outer join role r on r.id = ur.rid;
+    </select>
+
+    <!--根据id查询用户信息-->
+    <select id="findById" parameterType="Integer" resultType="domain.User">
+         select * from user where id = #{uid};
+    </select>
+
+    <!--根据QueryVo的条件查询用户信息-->
+    <select id="findUserByVo" parameterType="domain.QueryVo" resultType="domain.User">
+         select * from user where username like #{user.username};
+    </select>
+
+    <select id="findUserByCondition" resultType="domain.User" parameterType="domain.User">
+        select * from user
+        <where>
+            <if test="username != null">
+                and username = #{username}
+            </if>
+            <if test="sex != null">
+                and sex = #{sex}
+            </if>
+        </where>
+    </select>
+
+    <!--根据QueryVo中的id集合查询用户信息-->
+    <select id="findUserInIds" resultType="User" parameterType="User">
+        select * from user
+        <where>
+            <if test="ids != null and ids.size() > 0">
+                <foreach collection="ids" open=" and id in ( " close=")" item="id" separator=",">
+                    #{id}
+                    <!--此处#{}中的内容应该与foreach标签中额item相对应-->
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+</mapper>

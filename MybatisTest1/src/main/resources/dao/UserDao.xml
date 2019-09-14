@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.UserDao">
+
+
+    <!-- 配置 查询结果的列名和实体类的属性名的对应关系
+    (如果实体类中的属性与数据库中的列名不对应时，可以使用此方式完成查询等操作，也可以在sql中使用起别名的方式完成操作，
+    起别名的方式修改的sql语句多，但执行的效率高，此方式不需要修改sql语句，开发效率较高) -->
+    <!-- <resultMap id="userMap" type="domain.User">
+         &lt;!&ndash; 主键字段的对应 &ndash;&gt;
+         &lt;!&ndash;userId为实体类中的属性，id为数据库中的列名&ndash;&gt;
+         <id property="userId" column="id"></id>
+         &lt;!&ndash;非主键字段的对应&ndash;&gt;
+         <result property="userName" column="username"></result>
+         <result property="userAddress" column="address"></result>
+         <result property="userSex" column="sex"></result>
+         <result property="userBirthday" column="birthday"></result>
+     </resultMap>-->
+
+    <!--如果需要使用，则要在<select> 、<insert>等 中使用resultMap定义resultMap的对应的id-->
+
+
+    <!--查询所有-->
+    <select id="findAll" resultType="domain.User">
+      select * from  user ;
+    </select>
+
+    <!--保存用户-->
+    <insert id="saveUser" parameterType="domain.User">
+
+        <!--配置插入操作后，获取插入数据的 id-->
+        <selectKey keyProperty="id" order="AFTER" resultType="Integer">
+            select last_insert_id();
+
+        </selectKey>
+        insert into user(username,birthday,sex,address) values (#{username},#{birthday},#{sex},#{address});
+    </insert>
+
+    <!--更新用户-->
+    <update id="updateUser" parameterType="domain.User">
+        update user set username=#{username},birthday=#{birthday},sex=#{sex},address=#{address} where id=#{id};
+    </update>
+
+    <!--删除用户-->
+    <delete id="deleteUser" parameterType="Integer">
+        delete from user where id = #{uid};
+        <!--此处的占位符uid   是以基本类型或基本类型包装类的参数传递且只有一位，可以任意写-->
+    </delete>
+
+    <!--根据id查询用户信息-->
+    <select id="findById" parameterType="Integer" resultType="domain.User">
+         select * from user where id = #{uid};
+    </select>
+
+    <!--根据id查询用户信息-->
+    <select id="findByName" parameterType="String" resultType="domain.User">
+        <!--  方法一  -->
+         select * from user where username like #{username};
+        <!-- 方法二  ，注意，此处的value不能写成其他的值，只能是value -->
+       <!-- select * from user where username like '%${value}%';-->
+    </select>
+
+    <select id="findTotal" resultType="Integer">
+    select count(id) from user ;
+    </select>
+
+<!--    &lt;!&ndash;根据QueryVo的条件查询用户信息&ndash;&gt;
+    <select id="findUserByVo" parameterType="domain.QueryVo" resultType="domain.User">
+         select * from user where username like #{user.username};
+    </select>-->
+</mapper>

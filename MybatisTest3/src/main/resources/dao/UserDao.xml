@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.UserDao">
+
+    <resultMap id="UserAccountMap" type="User">
+        <id property="id" column="id"></id>
+        <result property="username" column="username"></result>
+        <result property="birthday" column="birthday"></result>
+        <result property="sex" column="sex"></result>
+        <result property="address" column="address"></result>
+        <collection property="accounts" ofType="Account">
+            <id property="id" column="aid"></id>
+            <result property="uid" column="uid"></result>
+            <result property="money" column="money"></result>
+        </collection>
+    </resultMap>
+
+
+<!--    &lt;!&ndash;查询所有&ndash;&gt;
+    <select id="findAll" resultType="domain.User">
+      select * from  user ;
+    </select>-->
+
+    <!--查询所有-->
+    <select id="findAll" resultMap="UserAccountMap">
+      select * from  user u left outer join account a on u.id = a.uid;
+    </select>
+
+    <!-- &lt;!&ndash;保存用户&ndash;&gt;
+     <insert id="saveUser" parameterType="domain.User">
+
+         &lt;!&ndash;配置插入操作后，获取插入数据的 id&ndash;&gt;
+         <selectKey keyProperty="id" order="AFTER" resultType="Integer">
+             select last_insert_id();
+
+         </selectKey>
+         insert into user(username,birthday,sex,address) values (#{username},#{birthday},#{sex},#{address});
+     </insert>
+
+     &lt;!&ndash;更新用户&ndash;&gt;
+     <update id="updateUser" parameterType="domain.User">
+         update user set username=#{username},birthday=#{birthday},sex=#{sex},address=#{address} where id=#{id};
+     </update>
+
+     &lt;!&ndash;删除用户&ndash;&gt;
+     <delete id="deleteUser" parameterType="Integer">
+         delete from user where id = #{uid};
+         &lt;!&ndash;此处的占位符uid   是以基本类型或基本类型包装类的参数传递且只有一位，可以任意写&ndash;&gt;
+     </delete>-->
+
+    <!--根据id查询用户信息-->
+    <select id="findById" parameterType="Integer" resultType="domain.User">
+         select * from user where id = #{uid};
+    </select>
+
+    <!--根据id查询用户信息-->
+    <select id="findByName" parameterType="String" resultType="domain.User">
+        <!--  方法一  -->
+        select * from user where username like #{username};
+        <!-- 方法二  ，注意，此处的value不能写成其他的值，只能是value -->
+        <!-- select * from user where username like '%${value}%';-->
+    </select>
+
+    <!-- &lt;!&ndash;查询总记录数&ndash;&gt;
+     <select id="findTotal" resultType="Integer">
+     select count(id) from user ;
+     </select>-->
+
+    <!--根据QueryVo的条件查询用户信息-->
+    <select id="findUserByVo" parameterType="domain.QueryVo" resultType="domain.User">
+         select * from user where username like #{user.username};
+    </select>
+
+    <!--根据条件进行查询-->
+    <!--<select id="findUserByCondition" resultType="domain.User" parameterType="domain.User">
+      select * from  user where 1 = 1
+      <if test="username != null">
+      and username = #{username}
+      </if>
+      <if test="sex != null">
+      and sex = #{sex}
+      </if>
+    </select>-->
+    <select id="findUserByCondition" resultType="domain.User" parameterType="domain.User">
+        select * from user
+        <where>
+            <if test="username != null">
+                and username = #{username}
+            </if>
+            <if test="sex != null">
+                and sex = #{sex}
+            </if>
+        </where>
+    </select>
+
+    <!--根据QueryVo中的id集合查询用户信息-->
+    <select id="findUserInIds" resultType="User" parameterType="User">
+        select * from user
+        <where>
+            <if test="ids != null and ids.size() > 0">
+                <foreach collection="ids" open=" and id in ( " close=")" item="id" separator=",">
+                    #{id}
+                    <!--此处#{}中的内容应该与foreach标签中额item相对应-->
+                </foreach>
+            </if>
+        </where>
+
+    </select>
+</mapper>
